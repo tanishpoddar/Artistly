@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type { Artist } from '@/lib/types';
 import { categories } from '@/lib/types';
@@ -128,7 +128,7 @@ const ArtistCardSkeleton = () => (
  * 
  * @returns JSX.Element - Complete artists listing page
  */
-export default function ArtistsPage() {
+function ArtistsPageContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') || 'all';
   
@@ -370,5 +370,32 @@ export default function ArtistsPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+/**
+ * Loading fallback component for Suspense
+ */
+function ArtistsPageLoading() {
+  return (
+    <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="text-center mb-12">
+        <Skeleton className="h-12 w-96 mx-auto mb-4" />
+        <Skeleton className="h-6 w-80 mx-auto" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <ArtistCardSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function ArtistsPage() {
+  return (
+    <Suspense fallback={<ArtistsPageLoading />}>
+      <ArtistsPageContent />
+    </Suspense>
   );
 }
